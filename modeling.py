@@ -27,6 +27,10 @@ import numpy as np
 import six
 import tensorflow as tf
 
+# Pruning stuff
+from tensorflow.contrib.model_pruning.python.pruning import apply_mask
+from tensorflow.contrib.model_pruning.python.layers.layers import masked_fully_connected
+
 
 class BertConfig(object):
   """Configuration for `BertModel`."""
@@ -225,11 +229,11 @@ class BertModel(object):
         # We "pool" the model by simply taking the hidden state corresponding
         # to the first token. We assume that this has been pre-trained
         first_token_tensor = tf.squeeze(self.sequence_output[:, 0:1, :], axis=1)
-        self.pooled_output = tf.layers.dense(
+        self.pooled_output = masked_fully_connected(
             first_token_tensor,
             config.hidden_size,
-            activation=tf.tanh,
-            kernel_initializer=create_initializer(config.initializer_range))
+            activation_fn=tf.tanh,
+            weights_initializer=create_initializer(config.initializer_range))
 
   def get_pooled_output(self):
     return self.pooled_output
@@ -406,10 +410,10 @@ def embedding_lookup(input_ids,
   if input_ids.shape.ndims == 2:
     input_ids = tf.expand_dims(input_ids, axis=[-1])
 
-  embedding_table = tf.get_variable(
+  embedding_table = apply_mask(tf.get_variable(
       name=word_embedding_name,
       shape=[vocab_size, embedding_size],
-      initializer=create_initializer(initializer_range))
+      initializer=create_initializer(initializer_range)))
 
   flat_input_ids = tf.reshape(input_ids, [-1])
   if use_one_hot_embeddings:
@@ -663,28 +667,28 @@ def attention_layer(from_tensor,
   to_tensor_2d = reshape_to_matrix(to_tensor)
 
   # `query_layer` = [B*F, N*H]
-  query_layer = tf.layers.dense(
+  query_layer = masked_fully_connected(
       from_tensor_2d,
       num_attention_heads * size_per_head,
-      activation=query_act,
-      name="query",
-      kernel_initializer=create_initializer(initializer_range))
+      activation_fn=query_act,
+      scope="query",
+      weights_initializer=create_initializer(initializer_range))
 
   # `key_layer` = [B*T, N*H]
-  key_layer = tf.layers.dense(
+  key_layer = masked_fully_connected(
       to_tensor_2d,
       num_attention_heads * size_per_head,
-      activation=key_act,
-      name="key",
-      kernel_initializer=create_initializer(initializer_range))
+      activation_fn=key_act,
+      scope="key",
+      weights_initializer=create_initializer(initializer_range))
 
   # `value_layer` = [B*T, N*H]
-  value_layer = tf.layers.dense(
+  value_layer = masked_fully_connected(
       to_tensor_2d,
       num_attention_heads * size_per_head,
-      activation=value_act,
-      name="value",
-      kernel_initializer=create_initializer(initializer_range))
+      activation_fn=value_act,
+      scope="value",
+      weights_initializer=create_initializer(initializer_range))
 
   # `query_layer` = [B, N, F, H]
   query_layer = transpose_for_scores(query_layer, batch_size,
@@ -855,27 +859,27 @@ def transformer_model(input_tensor,
         # Run a linear projection of `hidden_size` then add a residual
         # with `layer_input`.
         with tf.variable_scope("output"):
-          attention_output = tf.layers.dense(
+          attention_output = masked_fully_connected(
               attention_output,
               hidden_size,
-              kernel_initializer=create_initializer(initializer_range))
+              weights_initializer=create_initializer(initializer_range))
           attention_output = dropout(attention_output, hidden_dropout_prob)
           attention_output = layer_norm(attention_output + layer_input)
 
       # The activation is only applied to the "intermediate" hidden layer.
       with tf.variable_scope("intermediate"):
-        intermediate_output = tf.layers.dense(
+        intermediate_output = masked_fully_connected(
             attention_output,
             intermediate_size,
-            activation=intermediate_act_fn,
-            kernel_initializer=create_initializer(initializer_range))
+            activation_fn=intermediate_act_fn,
+            weights_initializer=create_initializer(initializer_range))
 
       # Down-project back to `hidden_size` then add the residual.
       with tf.variable_scope("output"):
-        layer_output = tf.layers.dense(
+        layer_output = masked_fully_connected(
             intermediate_output,
             hidden_size,
-            kernel_initializer=create_initializer(initializer_range))
+            weights_initializer=create_initializer(initializer_range))
         layer_output = dropout(layer_output, hidden_dropout_prob)
         layer_output = layer_norm(layer_output + attention_output)
         prev_output = layer_output
