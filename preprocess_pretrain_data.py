@@ -4,6 +4,10 @@ import subprocess
 from spacy.lang.en import English
 import os
 import json
+from univa_grid import TaskRunner
+
+# Number of tasks to run concurrently
+TASKS = 8
 
 # Locations of wikipedia dump and bookcorpus
 WIKI_LOC = 'data/enwiki'
@@ -30,26 +34,45 @@ def write_doc(doc, output_f):
     """
     for sent in doc.sents:
         text = sent.text.replace('\n', ' ')
-        if text and text != '"':
+        if text == '"':
+            print(text, file=output_f, end='')
+        elif text:
             print(text, file=output_f)
     print(file=output_f)
 
-# TODO (mitchg) - maybe don't write everything to a single file?
-with open('data/pretrain_sentencized.txt', 'w+') as output_f:
-    # Do all the wikipedia stuff
-    for subdir in os.listdir(WIKI_LOC):
-        for wiki_fname in os.listdir(os.path.join(WIKI_LOC, subdir)):
-            input_path = os.path.join(WIKI_LOC, subdir, wiki_fname)
-            if os.path.isfile(input_path):
-                # Every line is a json object representing a wikipedia article
-                for line in open(input_path, 'r'):
-                    doc = json.loads(line)
-                    # Use the large spacy model for wikipedia data, since it's supposed to be nice.
-                    write_doc(nlp_lg(doc['text']), output_f)
+def maybe_print_progress(doc_counter):
+    if doc_counter % 10000 == 0:
+        print("Processed {} documents".format(doc_counter))
 
-    # Do all the bookcorpus stuff
-    for book_fname in os.listdir(BOOK_LOC):
-        input_path = os.path.join(BOOK_LOC, book_fname)
-        if os.path.isfile(input_path):
-            # Use the rule-based sentecizer for books, because it handles quotes better.
-            write_doc(nlp(open(input_path).read()), output_f)
+def process_docs(task_id):
+    print("Processing every {}'th doc".format(task_id))
+    doc_counter = 0
+    with open('data/pretrain_sentencized_{}.txt'.format(task_id), 'w+') as output_f:
+        # Do all the wikipedia stuff
+        for subdir in os.listdir(WIKI_LOC):
+            for wiki_fname in os.listdir(os.path.join(WIKI_LOC, subdir)):
+                input_path = os.path.join(WIKI_LOC, subdir, wiki_fname)
+                if os.path.isfile(input_path):
+                    # Every line is a json object representing a wikipedia article
+                    for line in open(input_path, 'r'):
+                        if doc_counter % TASKS == task_id:
+                            doc = json.loads(line)
+                            # Use the large spacy model for wikipedia data, since it's supposed to be nice.
+                            write_doc(nlp_lg(doc['text']), output_f)
+                        doc_counter += 1
+                        maybe_print_progress(doc_counter)
+
+        # Do all the bookcorpus stuff
+        for book_fname in os.listdir(BOOK_LOC):
+            input_path = os.path.join(BOOK_LOC, book_fname)
+            if os.path.isfile(input_path):
+                if doc_counter % TASKS == task_id:
+                    # Use the rule-based sentecizer for books, because it handles quotes better.
+                    write_doc(nlp(open(input_path).read()), output_f)
+                doc_counter += 1
+                maybe_print_progress(doc_counter)
+
+if __name__ == '__main__':
+    task_runner = TaskRunner()
+    for task_id in range(TASKS):
+        task_runner.do_task(process_docs, task_id)
