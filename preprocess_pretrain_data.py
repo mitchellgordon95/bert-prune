@@ -19,12 +19,22 @@ nlp_lg = spacy.load("en_core_web_lg")
 
 # Also spacy, but using the rule-based sentencizer
 # Note: we use this for bookcorpus, since the dependency-parser-based sentencizer
-# tends to put quotation marks as their own sentences, and bookcorpus has a lot of quotations.
+# tends to put quotation marks as their own sentences, and bookcorpus has a lot
+# of quotations.
 nlp = English()
 nlp.add_pipe(nlp.create_pipe("sentencizer"))
-# Increase the max length of documents from 1M to 5M characters for this sentencizer. Books are long.
-# We can do this because we're using the rule-based sentencizer, not the parser, so we don't need as much memory.
-nlp.max_length = 5000000
+# Increase the max length of documents from 1M to 14M characters for this
+# sentencizer. Books are long. The longest book in bookcorpus is:
+# 13961563 out_txts/682810__debunkanji-chinese-glyphs-used-in-japanese.txt
+# We can do this because we're using the rule-based sentencizer, not the
+# parser, so we don't need as much memory.
+nlp.max_length = 14000000
+
+OUTPUT_DIR = 'data/pretrain_sentencized'
+try:
+    os.mkdir(OUTPUT_DIR)
+except FileExistsError:
+    pass
 
 def write_doc(doc, output_f):
     """From the BERT readme:
@@ -47,7 +57,7 @@ def maybe_print_progress(doc_counter):
 def process_docs(task_id):
     print("Processing every {}'th doc".format(task_id))
     doc_counter = 0
-    with open('data/pretrain_sentencized_{}.txt'.format(task_id), 'w+') as output_f:
+    with open(f'{OUTPUT_DIR}/pretrain_sentencized_{task_id}.txt', 'w+') as output_f:
         # Do all the wikipedia stuff
         for subdir in os.listdir(WIKI_LOC):
             for wiki_fname in os.listdir(os.path.join(WIKI_LOC, subdir)):
