@@ -6,4 +6,6 @@
 #$ -m ase
 #$ -M mitchell.gordon95@gmail.com
 #$ -q gpu.q@@1080
+ml load cuda90/toolkit
+export PYTHONPATH=.
 python create_pretrain_data_batch.py
