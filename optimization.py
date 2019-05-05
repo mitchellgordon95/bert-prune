@@ -21,8 +21,11 @@ from __future__ import print_function
 import re
 import tensorflow as tf
 
+# Pruning stuff
+from tensorflow.contrib.model_pruning.python.pruning import Pruning, get_pruning_hparams
 
-def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu):
+
+def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu, prune_config_flag):
   """Creates an optimizer training op."""
   global_step = tf.train.get_or_create_global_step()
 
@@ -76,11 +79,17 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu):
   train_op = optimizer.apply_gradients(
       zip(grads, tvars), global_step=global_step)
 
+  # Pruning mask update ops
+  prune_config =  get_pruning_hparams().parse(prune_config_flag)
+  prune = Pruning(prune_config, global_step=global_step)
+  mask_update_op = prune.conditional_mask_update_op()
+  prune.add_pruning_summaries()
+
   # Normally the global step update is done inside of `apply_gradients`.
   # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
   # a different optimizer, you should probably take this line out.
   new_global_step = global_step + 1
-  train_op = tf.group(train_op, [global_step.assign(new_global_step)])
+  train_op = tf.group(train_op, mask_update_op, [global_step.assign(new_global_step)])
   return train_op
 
 
