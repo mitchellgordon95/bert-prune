@@ -80,10 +80,13 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu, 
       zip(grads, tvars), global_step=global_step)
 
   # Pruning mask update ops
-  prune_config =  get_pruning_hparams().parse(prune_config_flag)
-  prune = Pruning(prune_config, global_step=global_step)
-  mask_update_op = prune.conditional_mask_update_op()
-  prune.add_pruning_summaries()
+  if prune_config_flag:
+    prune_config =  get_pruning_hparams().parse(prune_config_flag)
+    prune = Pruning(prune_config, global_step=global_step)
+    mask_update_op = prune.conditional_mask_update_op()
+    prune.add_pruning_summaries()
+  else:
+    mask_update_op = tf.no_op()
 
   # Normally the global step update is done inside of `apply_gradients`.
   # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
