@@ -81,11 +81,13 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu, 
 
   # Pruning mask update ops
   if prune_config_flag:
+    tf.logging.info(f'Pruning with configs {prune_config_flag}')
     prune_config =  get_pruning_hparams().parse(prune_config_flag)
     prune = Pruning(prune_config, global_step=global_step)
     mask_update_op = prune.conditional_mask_update_op()
     prune.add_pruning_summaries()
   else:
+    tf.logging.info('No pruning config provided, skipping pruning')
     mask_update_op = tf.no_op()
 
   # Normally the global step update is done inside of `apply_gradients`.
