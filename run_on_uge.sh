@@ -5,7 +5,10 @@
 #$ -j y
 #$ -m ase
 #$ -M mitchell.gordon95@gmail.com
-#$ -q gpu.q@@1080
+#$ -q gpu.q@@titanxp
+
+# Note: Titan XP gpus have the most memory on the grid (12 GB)
+
 ml load cuda90/toolkit
 export PYTHONPATH=.
-python create_pretrain_data_batch.py
+python $1
