@@ -1,23 +1,24 @@
 import subprocess
 from univa_grid import TaskRunner
-from pretrain_experiments.common import run_pretrain_base, SparsityHParams
+from pretrain_experiments.common import TRAIN_128, DEV_128, pretrain, pretrain_eval, SparsityHParams
 import os
 
 def gradual_prune(sparsity):
-    # TODO (mitchg) - also finetune on max_seq_len=50
-    run_pretrain_base(
-        model_name=f"gradual_prune_{int(sparsity*100)}",
-        do_train=True
-        do_eval=False,
+    # TODO (mitchg) - also finetune on max_seq_len=500
+    model_name = f"gradual_prune_{int(sparsity*100)}"
+    pretrain(
+        input_file=TRAIN_128,
+        model_name=model_name,
         num_train_steps=10000,
-        max_eval_steps=0,
         sparsity_hparams=SparsityHParams(
             initial_sparsity=0,
             target_sparsity=sparsity,
-            sparsity_function_send_step=10000,
+            sparsity_function_end_step=10000,
             end_pruning_step=-1,
             )
     )
+    # TODO (mitchg) what's the right number here?
+    pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=1000)
 
 
 task_runner = TaskRunner()
