@@ -1,7 +1,6 @@
 from univa_grid import TaskRunner
 import subprocess
 import os
-
 import math
 
 MAX_SEQ_LEN = 128
@@ -13,10 +12,16 @@ except FileExistsError:
     pass
 
 def create_pretrain(task_id):
+    output_files = ','.join([
+        f'data/pretrain_examples_len_{MAX_SEQ_LEN}/tf_examples_{task_id}_{out_index}.tfrecord'
+        # Using 100 output files (which are randomly shuffled) so we can pick a few for the dev set
+        for out_index in range(100)
+        ])
+
     subprocess.call([
         'python', 'create_pretraining_data.py',
         '--input_file', f'data/pretrain_sentencized/pretrain_sentencized_{task_id}.txt',
-        '--output_file', f'data/pretrain_examples_len_{MAX_SEQ_LEN}/tf_examples_{task_id}.tfrecord',
+        '--output_file', output_files,
         '--vocab_file', 'uncased_L-12_H-768_A-12/vocab.txt',
         '--do_lower_case', 'True',
         '--max_seq_length', str(MAX_SEQ_LEN),
@@ -27,4 +32,4 @@ def create_pretrain(task_id):
 
 task_runner = TaskRunner()
 for task_id in range(8):
-   task_runner.do_task(create_pretrain, task_id)
+    task_runner.do_task(create_pretrain, task_id)
