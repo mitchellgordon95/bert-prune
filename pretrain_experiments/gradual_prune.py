@@ -6,19 +6,20 @@ import os
 def gradual_prune(sparsity):
     # TODO (mitchg) - also finetune on max_seq_len=500
     model_name = f"gradual_prune_{int(sparsity*100)}"
-    pretrain(
-        input_file=TRAIN_128,
-        model_name=model_name,
-        num_train_steps=10000,
-        sparsity_hparams=SparsityHParams(
-            initial_sparsity=0,
-            target_sparsity=sparsity,
-            sparsity_function_end_step=10000,
-            end_pruning_step=-1,
-            )
-    )
-    # TODO (mitchg) what's the right number here?
-    pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=1000)
+    for step in range(20):
+        pretrain(
+            input_file=TRAIN_128,
+            model_name=model_name,
+            num_train_steps=5000*step,
+            sparsity_hparams=SparsityHParams(
+                initial_sparsity=0,
+                target_sparsity=sparsity,
+                sparsity_function_end_step=10000,
+                end_pruning_step=-1,
+                )
+        )
+        # TODO (mitchg) what's the right number here?
+        pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=2000)
 
 
 task_runner = TaskRunner()

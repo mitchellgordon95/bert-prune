@@ -36,20 +36,18 @@ def _run_pretraining(
         max_eval_steps,
         sparsity_hparams: SparsityHParams,
         ):
+    train_args = ["--do_train=True", "--num_train_steps", str(num_train_steps)] if do_train else []
+    eval_args = ["--do_eval=True", "--max_eval_steps", str(max_eval_steps)] if do_eval else []
+    sparsity_args = ['--pruning_hparams', str(sparsity_hparams)] if sparsity_hparams else []
     subprocess.call([
         "python", "run_pretraining.py",
         "--input_file", input_file,
         "--output_dir", os.path.join(OUTPUT_DIR, model_name),
-        "--do_train", str(do_train),
-        "--do_eval", str(do_eval),
         "--bert_config_file", f"{BERT_BASE_DIR}/bert_config.json",
         "--init_checkpoint", f"{BERT_BASE_DIR}/bert_model.ckpt",
         "--train_batch_size", "32",
         "--max_seq_length", "128",
         "--max_predictions_per_seq", "20",
-        "--num_train_steps", str(num_train_steps),
-        "--max_eval_steps", str(max_eval_steps), 
         "--num_warmup_steps", "10",
-        "--learning_rate", "2e-5"
-        ] + (['--pruning_hparams', str(sparsity_hparams)] if sparsity_hparams else [])
+        "--learning_rate", "2e-5"] + train_args + eval_args + sparsity_args
     )
