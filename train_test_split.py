@@ -8,6 +8,7 @@ random.seed(1)
 
 if len(sys.argv) < 2:
     print("Usage: train_test_split.py [data_dir]")
+    exit()
 
 data_dir = sys.argv[1]
 
