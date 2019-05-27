@@ -23,5 +23,5 @@ def gradual_prune(sparsity):
 
 
 task_runner = TaskRunner()
-for sparsity in [.4, .5, .6, .7, .8, .9]: # -t 1-6 for univa grid engine
+for sparsity in [0, .4, .5, .6, .7, .8, .9]: # -t 1-6 for univa grid engine
    task_runner.do_task(gradual_prune, sparsity)

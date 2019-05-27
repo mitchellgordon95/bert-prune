@@ -3,7 +3,7 @@ import subprocess
 import os
 
 BERT_BASE_DIR = "uncased_L-12_H-768_A-12_prunable"
-OUTPUT_DIR = "models"
+OUTPUT_DIR = "models/pretrain"
 TRAIN_128 = "data/pretrain_examples_len_128/train/*"
 DEV_128 = "data/pretrain_examples_len_128/dev/*"
 
