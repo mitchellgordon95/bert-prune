@@ -19,7 +19,7 @@ os.mkdir(OUTPUT_DIR)
 
 with tf.Session() as sess:
 
-    # Load all the variables from the checkpoint, renaming as we go
+    # Load all the variables from the checkpoint, updating as we go
     for var_name, _ in tf.train.list_variables(CHECKPOINT_DIR):
         var_tensor = tf.contrib.framework.load_variable(CHECKPOINT_DIR, var_name)
 
@@ -34,4 +34,4 @@ with tf.Session() as sess:
     # Save these new variables
     saver = tf.train.Saver()
     sess.run(tf.global_variables_initializer())
-    saver.save(sess, OUTPUT_DIR)
+    saver.save(sess, os.path.join(OUTPUT_DIR, 'sign_ticket.ckpt'))
