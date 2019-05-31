@@ -1,8 +1,9 @@
+import subprocess
 from univa_grid import TaskRunner
 from downstream_experiments.common import train, eval_, predict
 
 def train_downstream(sparsity):
-    init_model_name = f"gradual_prune_{int(sparsity*100)}"
+    init_model_name = f"gradual_prune_{int(sparsity*100)}_sign_ticket"
     # TODO (mitchg) we're missing some tasks because run_classifier doesn't support them
     # QQP, QNLI, SST-2, STS-B, RTE
     for task in ['MRPC', 'CoLA', 'MNLI', 'XNLI']:
