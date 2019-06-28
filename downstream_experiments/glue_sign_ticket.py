@@ -4,9 +4,7 @@ from downstream_experiments.common import train, eval_, predict
 
 def train_downstream(sparsity):
     init_model_name = f"gradual_prune_{int(sparsity*100)}_sign_ticket"
-    # TODO (mitchg) we're missing some tasks because run_classifier doesn't support them
-    # QQP, QNLI, SST-2, STS-B, RTE
-    for task in ['MRPC', 'CoLA', 'MNLI', 'XNLI']:
+    for task in ['MRPC', 'QQP', 'QNLI', 'SST-2', 'CoLA', 'MNLI', 'XNLI', 'RTE']:
         for lr in ['2e-5','3e-5','4e-5','5e-5',]:
             for epoch in range(10):
                 train(task, init_model_name, epoch, lr)
