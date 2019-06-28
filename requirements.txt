@@ -3,3 +3,9 @@ tensorflow-gpu  >= 1.11.0  # GPU version of TensorFlow.
 spacy
 # The large spacy model, which we use for sentence segmentation
 https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.1.0/en_core_web_lg-2.1.0.tar.gz
+
+# From https://github.com/cybertronai/gradient-checkpointing
+# Because they didn't release a pip package :(
+toposort
+networkx
+pytest
