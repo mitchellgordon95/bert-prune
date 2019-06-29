@@ -5,7 +5,7 @@ def train_downstream(sparsity):
     init_model_name = f"gradual_prune_{int(sparsity*100)}"
     for task in ['MRPC', 'QQP', 'QNLI', 'SST-2', 'CoLA', 'MNLI', 'XNLI', 'RTE']:
         for lr in ['2e-5','3e-5','4e-5','5e-5']:
-            for epoch in range(3):
+            for epoch in range(4):
                 train(task, init_model_name, epoch, lr)
                 eval_(task, init_model_name)
 
