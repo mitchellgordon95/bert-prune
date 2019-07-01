@@ -33,8 +33,8 @@ def _run_classifier(
 def train(task_name, init_model_name, num_train_epochs, lr):
     _run_classifier(task_name, init_model_name, do_train=True, do_eval=False, do_predict=False, num_train_epochs=num_train_epochs, lr=lr)
 
-def eval_(task_name, init_model_name):
-    _run_classifier(task_name, init_model_name, do_train=False, do_eval=True, do_predict=False)
+def eval_(task_name, init_model_name, lr):
+    _run_classifier(task_name, init_model_name, do_train=False, do_eval=True, do_predict=False, lr=lr)
 
 def predict(task_name, init_model_name):
     _run_classifier(task_name, init_model_name, do_train=False, do_eval=False, do_predict=True)
