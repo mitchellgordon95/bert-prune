@@ -20,11 +20,10 @@ with tf.Session() as sess:
     for var_name, _ in tf.train.list_variables(CHECKPOINT_DIR):
         var_tensor_np = tf.contrib.framework.load_variable(CHECKPOINT_DIR, var_name)
 
-        # Replace each value in each weights matrix with STDDEV of the same sign
+        # Zero out every mask tensor
         if 'mask' == var_name[-4:]:
             var_tensor_np[:] = 0
 
-        # TODO (mitchg) - should we be keeping other variables like LayerNorm and Adam?
         var = tf.Variable(var_tensor_np, name=var_name)
 
     # Save these new variables
