@@ -323,6 +323,13 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
   assignment_map = {}
   initialized_variable_names = {}
 
+  # Add mask variables to the list of "trainable" variables.
+  # Even though they're not "trainable" by gradient descent,
+  # we still need to load them into our model.
+  for var in tf.global_variables():
+    if var not in tvars and 'mask' in var.name:
+      tvars.append(var)
+
   name_to_variable = collections.OrderedDict()
   for var in tvars:
     name = var.name
