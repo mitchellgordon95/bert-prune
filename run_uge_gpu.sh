@@ -13,6 +13,5 @@
 ml load cuda10.0/toolkit
 echo "CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES}"
 nvidia-smi
-conda list
 export PYTHONPATH=.
 python $1 "${@:2}"
