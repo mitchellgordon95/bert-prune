@@ -336,11 +336,13 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
   assignment_map = collections.OrderedDict()
   for x in init_vars:
     (name, var) = (x[0], x[1])
+    assert name != "bert/embeddings//mask", "Please run checkpoint_utils/fix_embed_name.py on this checkpoint."
     if name not in name_to_variable:
       continue
     assignment_map[name] = name
     initialized_variable_names[name] = 1
     initialized_variable_names[name + ":0"] = 1
+
 
   return (assignment_map, initialized_variable_names)
 
@@ -413,7 +415,7 @@ def embedding_lookup(input_ids,
   embedding_table = apply_mask(tf.get_variable(
       name=word_embedding_name,
       shape=[vocab_size, embedding_size],
-      initializer=create_initializer(initializer_range)))
+      initializer=create_initializer(initializer_range)), scope='embed_mask')
 
   flat_input_ids = tf.reshape(input_ids, [-1])
   if use_one_hot_embeddings:
