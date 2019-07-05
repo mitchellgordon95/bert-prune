@@ -27,6 +27,7 @@ def _run_classifier(
         "--vocab_file", f"{BERT_BASE_DIR}/vocab.txt",
         "--train_batch_size", "32",
         "--max_seq_length", "128",
+        "--keep_checkpoint_max", "2",
         "--learning_rate", "2e-5"] + train_args + eval_args + predict_args
     )
 

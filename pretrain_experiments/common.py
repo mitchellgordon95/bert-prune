@@ -49,5 +49,6 @@ def _run_pretraining(
         "--max_seq_length", "128",
         "--max_predictions_per_seq", "20",
         "--num_warmup_steps", "10",
+        "--keep_checkpoint_max", "2",
         "--learning_rate", "2e-5"] + train_args + eval_args + sparsity_args
     )
