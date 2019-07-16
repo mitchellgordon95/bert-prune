@@ -1,6 +1,7 @@
 import subprocess
 from univa_grid import TaskRunner
-from pretrain_experiments.common import TRAIN_128, DEV_128, pretrain, pretrain_eval, SparsityHParams
+from pretrain_experiments.common import TRAIN_128, DEV_128, pretrain, pretrain_eval
+from experiments_common import SparsityHParams
 import os
 
 def prune_finetune(sparsity):
@@ -23,5 +24,5 @@ def prune_finetune(sparsity):
 
 
 task_runner = TaskRunner()
-for sparsity in [.4, .5, .6, .7, .8, .9]: # -t 1-6 for univa grid engine
+for sparsity in [0, .4, .5, .6, .7, .8, .9]: # -t 1-8 for univa grid engine
    task_runner.do_task(prune_finetune, sparsity)

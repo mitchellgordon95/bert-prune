@@ -12,5 +12,5 @@ def train_downstream(sparsity):
                 eval_(task, model_name, lr)
 
 task_runner = TaskRunner()
-for sparsity in [0, .4, .5, .6, .7, .8, .9]: # -t 1-7 for univa grid engine
+for sparsity in [0, .4, .5, .6, .7, .8, .9]: # -t 1-8 for univa grid engine
    task_runner.do_task(train_downstream, sparsity)

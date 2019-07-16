@@ -1,25 +1,11 @@
-from collections import namedtuple
 import subprocess
 import os
+from experiments_common import SparsityHParams
 
 BERT_BASE_DIR = "uncased_L-12_H-768_A-12_prunable"
 OUTPUT_DIR = "models/pretrain"
 TRAIN_128 = "data/pretrain_examples_len_128/train/*"
 DEV_128 = "data/pretrain_examples_len_128/dev/*"
-
-class SparsityHParams(
-        namedtuple('SparsityHParams', [
-            'initial_sparsity',
-            'target_sparsity',
-            'sparsity_function_end_step',
-            'end_pruning_step'])):
-    """See:
-    https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/model_pruning"""
-    def __str__(self):
-        return (f'initial_sparsity={self.initial_sparsity},'
-                f'target_sparsity={self.target_sparsity},'
-                f'sparsity_function_end_step={self.sparsity_function_end_step},'
-                f'end_pruning_step={self.end_pruning_step}')
 
 def pretrain(model_name, input_file, num_train_steps, sparsity_hparams: SparsityHParams):
     _run_pretraining(model_name, input_file, True, False, num_train_steps, 0, sparsity_hparams)
