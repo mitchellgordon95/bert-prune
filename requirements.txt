@@ -12,3 +12,4 @@ pytest
 
 # For generating tables
 parse
+matplotlib
