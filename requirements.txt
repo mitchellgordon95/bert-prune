@@ -13,3 +13,6 @@ pytest
 # For generating tables
 parse
 matplotlib
+
+# For executing some scripts
+fire
