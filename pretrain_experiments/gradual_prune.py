@@ -19,10 +19,11 @@ def gradual_prune(sparsity):
                 end_pruning_step=-1,
                 )
         )
-        # TODO (mitchg) what's the right number here?
+        # Note: max_eval_steps is the number of batches we process
+        # default batch size is 8
         pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=2000)
 
 
 task_runner = TaskRunner()
-for sparsity in [0, .4, .5, .6, .7, .8, .9]: # -t 1-8 for univa grid engine
+for sparsity in [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]: # -t 1-10 for univa grid engine
    task_runner.do_task(gradual_prune, sparsity)

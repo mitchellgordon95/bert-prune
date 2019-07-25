@@ -19,8 +19,9 @@ def prune_finetune(sparsity):
                 end_pruning_step=200,
                 )
         )
-        # TODO (mitchg) what's the right number here?
-        pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=1000)
+        # Note: max_eval_steps is the number of batches we process
+        # default batch size is 8
+        pretrain_eval(model_name=model_name, input_file=DEV_128, max_eval_steps=2000)
 
 
 task_runner = TaskRunner()
