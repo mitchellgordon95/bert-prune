@@ -6,7 +6,10 @@ import re
 
 color_map = {
     0: 'black',
-    .4: 'blue',
+    .1: 'grey',
+    .2: 'darkblue',
+    .3: 'blue',
+    .4: 'darkgreen',
     .5: 'green',
     .6: 'yellow',
     .7: 'orange',
@@ -28,16 +31,15 @@ def plot_thresholds(sparsity, ax):
     for value in event.summary.value:
         if 'threshold' in value.tag:
             tag = re.sub(r'model_pruning_summaries/bert/(.*)/threshold/threshold', r'\1', value.tag)
-            print(tag)
-
-            x.append(value.simple_value)
-            y.append(tag)
-            # ax.scatter(value.simple_value, tag, color=color_map[sparsity])
+            if tag != 'embeddings/':
+                x.append(value.simple_value)
+                y.append(tag)
+                # ax.scatter(value.simple_value, tag, color=color_map[sparsity])
 
     ax.plot(x, y, color=color_map[sparsity])
 
 fig, ax = plt.subplots(figsize=(20,20))
-for sparsity in [0, .3, .4, .5, .6, .7, .8, .9]:
+for sparsity in [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]:
     try:
         threshold = plot_thresholds(sparsity, ax)
     except IndexError:
