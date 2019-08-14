@@ -1,24 +1,24 @@
 from tables.common import parse_file, grid_search_eval
 
-EVAL_RESULTS_TEMPLATE = """eval_accuracy = {eval_accuracy:f}
-eval_loss = {eval_loss:f}
-global_step = {step:d}
-loss = {loss:f}"""
+PRETRAIN_EVAL_RESULTS_TEMPLATE = """global_step = {global_step:d}
+loss = {loss:f}
+masked_lm_accuracy = {masked_lm_accuracy:f}
+masked_lm_loss = {masked_lm_loss:f}
+next_sentence_accuracy = {next_sentence_accuracy:f}
+next_sentence_loss = {next_sentence_loss:f}
+"""
 
 table_rows = []
 for sparsity in [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]:
 
-    row_entries = grid_search_eval(lambda task, lr: f'models/{task}/gradual_prune_{int(sparsity*100)}_lr_{lr}/eval_results.txt')
+    eval_entries, train_losses = grid_search_eval(lambda task, lr: f'models/{task}/gradual_prune_{int(sparsity*100)}_lr_{lr}/eval_results.txt')
 
     pretrain_results = parse_file(f'models/pretrain/gradual_prune_{int(sparsity*100)}/eval_results.txt', PRETRAIN_EVAL_RESULTS_TEMPLATE)
-    if pretrain_results:
-        row_entries.append(pretrain_results['loss'])
-    else:
-        row_entries.append(0)
+    pretrain_loss = pretrain_results['loss'] if pretrain_results else '?'
 
-    avg = sum(row_entries[1:]) / (len(row_entries) - 1)
+    avg = sum(eval_entries[1:]) / (len(eval_entries) - 1)
     table_rows.append(
-        f"{sparsity} & " + " & ".join([f"{acc:.2f}" for acc in row_entries]) + f" & {avg:.2f}"
+        f"{sparsity} & {pretrain_loss:.2f} & " + " & ".join([f"{acc:.2f}|{loss:.2f}" for acc, loss in zip(eval_entries, train_losses)]) + f" & {avg:.2f}"
     )
 
 rows = "\\\\\n".join(table_rows)

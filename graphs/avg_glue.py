@@ -6,7 +6,7 @@ def plot_avg_acc(eval_path_str, label, ax):
     avgs = []
     sparsities = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
     for sparsity in sparsities:
-        rows_vals = grid_search_eval(lambda task, lr: eval_path_str.format(task=task,sparsity=int(sparsity*100),lr=lr))
+        rows_vals, _ = grid_search_eval(lambda task, lr: eval_path_str.format(task=task,sparsity=int(sparsity*100),lr=lr))
         avgs.append(sum(rows_vals) / len(rows_vals))
 
     ax.plot(sparsities, avgs, label=label)
