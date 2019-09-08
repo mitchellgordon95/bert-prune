@@ -16,9 +16,10 @@ for sparsity in [0, .1, .2, .3, .4, .5, .6, .7, .8, .9]:
     pretrain_results = parse_file(f'models/pretrain/gradual_prune_{int(sparsity*100)}/eval_results.txt', PRETRAIN_EVAL_RESULTS_TEMPLATE)
     pretrain_loss = pretrain_results['loss'] if pretrain_results else '?'
 
-    avg = sum(eval_entries[1:]) / (len(eval_entries) - 1)
+    avg_eval = sum(eval_entries) / len(eval_entries)
+    avg_loss = sum(train_losses) / len(train_losses)
     table_rows.append(
-        f"{sparsity} & {pretrain_loss:.2f} & " + " & ".join([f"{acc:.2f}|{loss:.2f}" for acc, loss in zip(eval_entries, train_losses)]) + f" & {avg:.2f}"
+        f"{sparsity} & {pretrain_loss:.2f} & " + " & ".join([f"{acc:.2f}|{loss:.2f}" for acc, loss in zip(eval_entries, train_losses)]) + f" & {avg_eval:.2f}|{avg_loss:.2f}"
     )
 
 rows = "\\\\\n".join(table_rows)

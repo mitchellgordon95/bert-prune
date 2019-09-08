@@ -16,16 +16,6 @@ def parse_file(fname, template):
         print(f"Missing {fname}")
         return None
 
-def last_training_loss(model_dir):
-    event_paths = sorted(glob.glob(os.path.join(model_dir, "event*")))
-
-    for event_path in event_paths:
-        for event in tf.train.summary_iterator(event_path):
-            for value in event.summary.value:
-                if value.tag == 'loss_1':
-                    last_loss = value.simple_value
-    return last_loss
-
 def grid_search_eval(eval_path_fn):
     """Given eval_path_fn(task, lr), searches over some eval results and
     returns the best one for each task"""
@@ -36,7 +26,8 @@ def grid_search_eval(eval_path_fn):
         grid_search_res = []
         for lr in ['2e-5','3e-5','4e-5','5e-5']:
             downstream_results = parse_file(eval_path_fn(task, lr), EVAL_RESULTS_TEMPLATE)
-            train_loss = last_training_loss(eval_path_fn(task,lr)[:-16])
+            train_eval = parse_file(eval_path_fn(task,lr)[:-16] + 'eval_train_results.txt', EVAL_RESULTS_TEMPLATE)
+            train_loss = train_eval['loss'] if train_eval else float('inf')
             if downstream_results:
                 grid_search_res.append((downstream_results['eval_accuracy'], train_loss))
 
