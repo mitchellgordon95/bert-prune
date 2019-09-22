@@ -1,7 +1,7 @@
 #! /bin/bash
 #$ -cwd
 #$ -V
-#$ -l gpu=1,h_rt=72:00:00,num_proc=2,mem_free=3G
+#$ -l gpu=1,h_rt=160:00:00,num_proc=2,mem_free=3G
 #$ -j y
 #$ -m ase
 #$ -M mitchell.gordon95@gmail.com
