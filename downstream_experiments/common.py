@@ -12,6 +12,7 @@ def _run_classifier(
         model_name,
         do_train,
         do_eval,
+        eval_train_data, # evaluate on the whole training set instead of the dev set.
         do_predict,
         num_train_epochs=0,
         lr="2e-5",
@@ -20,6 +21,7 @@ def _run_classifier(
     train_args = ["--do_train=True", "--num_train_epochs", str(num_train_epochs)] if do_train else []
     eval_args = ["--do_eval=True"] if do_eval else []
     predict_args = ["--do_predict=True"] if do_predict else []
+    eval_train_args = ['--eval_train_data=True'] if eval_train_data else [] # Lets us evaluate on the whole training set
     init_args = ["--init_checkpoint", init_model_dir] if init_model_dir else []
     sparsity_args = ['--pruning_hparams', str(sparsity_hparams)] if sparsity_hparams else []
     subprocess.call([
@@ -32,14 +34,14 @@ def _run_classifier(
         "--train_batch_size", "32",
         "--max_seq_length", "128",
         "--keep_checkpoint_max", "1",
-        "--learning_rate", lr] + train_args + eval_args + predict_args + init_args + sparsity_args
+        "--learning_rate", lr] + train_args + eval_args + predict_args + eval_train_args + init_args + sparsity_args
     )
 
 def train(task_name, init_model_dir, model_name, num_train_epochs, lr, sparsity_hparams=None):
-    _run_classifier(task_name, init_model_dir, model_name, do_train=True, do_eval=False, do_predict=False, num_train_epochs=num_train_epochs, lr=lr, sparsity_hparams=sparsity_hparams)
+    _run_classifier(task_name, init_model_dir, model_name, do_train=True, do_eval=False, eval_train_data=False, do_predict=False, num_train_epochs=num_train_epochs, lr=lr, sparsity_hparams=sparsity_hparams)
 
-def eval_(task_name, model_name, lr):
-    _run_classifier(task_name, None, model_name, do_train=False, do_eval=True, do_predict=False, lr=lr)
+def eval_(task_name, model_name, lr, use_train_data=False):
+    _run_classifier(task_name, None, model_name, do_train=False, do_eval=True, eval_train_data=use_train_data, do_predict=False, lr=lr)
 
 def predict(task_name, model_name):
-    _run_classifier(task_name, None, model_name, do_train=False, do_eval=False, do_predict=True)
+    _run_classifier(task_name, None, model_name, do_train=False, do_eval=False, eval_train_data=False, do_predict=True)

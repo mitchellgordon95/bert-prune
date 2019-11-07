@@ -127,3 +127,4 @@ dmypy.json
 *.o*
 
 models/
+*.png

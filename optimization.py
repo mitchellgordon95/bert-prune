@@ -24,6 +24,7 @@ import memory_saving_gradients
 
 # Pruning stuff
 from tensorflow.contrib.model_pruning.python.pruning import Pruning, get_pruning_hparams
+import os
 
 
 def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu, prune_config_flag):
@@ -71,8 +72,12 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, use_tpu, 
   if use_tpu:
     optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 
+  # memory_saving_gradients.DEBUG_LOGGING = True
   tvars = tf.trainable_variables()
-  grads = memory_saving_gradients.gradients(loss, tvars, checkpoints='memory')
+  if os.getenv('DISABLE_GRAD_CHECKPOINT'):
+    grads = tf.gradients(loss, tvars)
+  else:
+    grads = memory_saving_gradients.gradients(loss, tvars, checkpoints='memory')
 
   # This is how the model was pre-trained.
   (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)

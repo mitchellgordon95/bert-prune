@@ -2,11 +2,13 @@ from univa_grid import TaskRunner
 from downstream_experiments.common import train, eval_, predict, MODELS_DIR
 
 def train_downstream(sparsity):
-    model_name = f"gradual_prune_{int(sparsity*100)}_sign_ticket"
+    model_name = f"burned_in_random_prune_{int(sparsity*100)}"
     init_model_dir = f"{MODELS_DIR}/pretrain/{model_name}"
     # This is the order from least training data to most training data
-    for task in [ 'CoLA', 'SST-2', 'QNLI', 'QQP', 'MNLI']:
-        for lr in ['2e-5','3e-5','4e-5','5e-5']:
+    if sparsity == 0.9:
+        eval_('QNLI', model_name, '5e-5', use_train_data=True)
+    for task in ['QQP']: #['CoLA', 'SST-2', 'QNLI', 'QQP', 'MNLI']:
+        for lr in ['2e-5','3e-5']:
             for epoch in range(4):
                 train(task, init_model_dir, model_name, epoch, lr)
                 eval_(task, model_name, lr)

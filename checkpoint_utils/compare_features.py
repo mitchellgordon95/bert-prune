@@ -1,8 +1,10 @@
 import fire
 import json
 import numpy as np
+import sys
 
-def main(first_fname, second_fname):
+def layers(first_fname, second_fname):
+    """Returns an iterator over pairs of layer activations from BERT feature files"""
     first_file = open(first_fname)
     second_file = open(second_fname)
     for first_line, second_line in zip(first_file, second_file):
@@ -17,10 +19,28 @@ def main(first_fname, second_fname):
 
                 first_vec = np.array(first_layer['values'])
                 second_vec = np.array(second_layer['values'])
-                # dist = np.linalg.norm(first_vec - second_vec)
-                cos = 1 - np.dot(first_vec, second_vec) / (np.linalg.norm(first_vec) * np.linalg.norm(second_vec))
 
-                print(f"{first_feature['token']} ({first_layer['index']}): {cos}")
+                yield first_vec, second_vec
+
+def main(first_fname, second_fname):
+    total_sim = 0
+    layer_count = 0
+
+    for first_vec, second_vec in layers(first_fname, second_fname):
+        # dist = np.linalg.norm(first_vec - second_vec)
+        cos = np.dot(first_vec, second_vec) / (np.linalg.norm(first_vec) * np.linalg.norm(second_vec))
+
+        total_sim += cos
+        layer_count += 1
+        if layer_count % 10000 == 0:
+            print(layer_count, file=sys.stderr)
+        if layer_count > 300000:
+            print('Passed 300k layers, ignoring the rest.', file=sys.stderr)
+            break
+        # print(f"{first_feature['token']} ({first_layer['index']}): {cos}")
+
+    print(f'{total_sim} / {layer_count} = {total_sim / layer_count}')
+
 
 if __name__ == '__main__':
     fire.Fire(main)

@@ -6,4 +6,4 @@ def prune(tensor, sparsity):
     tensor = np.abs(tensor)
     thresh_ind = int(tensor.size * sparsity)
     threshold = np.partition(tensor.flatten(), thresh_ind)[thresh_ind]
-    return tensor < threshold
+    return tensor > threshold

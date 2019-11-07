@@ -71,6 +71,8 @@ flags.DEFINE_bool("do_train", False, "Whether to run training.")
 
 flags.DEFINE_bool("do_eval", False, "Whether to run eval on the dev set.")
 
+flags.DEFINE_bool("eval_train_data", False, "Runs eval on the training set instead of the dev set.")
+
 flags.DEFINE_bool(
     "do_predict", False,
     "Whether to run the model in inference mode on the test set.")
@@ -1120,6 +1122,12 @@ def main(_):
       assert len(eval_examples) % FLAGS.eval_batch_size == 0
       eval_steps = int(len(eval_examples) // FLAGS.eval_batch_size)
 
+    # This is a little hacky, but sometimes we want to evaluate on the training set
+    # instead of the dev set. So ignore the file we made above and just use the training file.
+    if FLAGS.eval_train_data:
+      tf.logging.info("Oh nevermind, we're running eval on the training data instead.")
+      eval_file = os.path.join(FLAGS.output_dir, "train.tf_record")
+
     eval_drop_remainder = True if FLAGS.use_tpu else False
     eval_input_fn = file_based_input_fn_builder(
         input_file=eval_file,
@@ -1129,7 +1137,7 @@ def main(_):
 
     result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
 
-    output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
+    output_eval_file = os.path.join(FLAGS.output_dir, "eval_train_results.txt" if FLAGS.eval_train_data else "eval_results.txt" )
     with tf.gfile.GFile(output_eval_file, "w") as writer:
       tf.logging.info("***** Eval results *****")
       for key in sorted(result.keys()):
