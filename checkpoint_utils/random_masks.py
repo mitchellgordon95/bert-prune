@@ -6,9 +6,9 @@ import os
 from shutil import copyfile
 import fire
 
-def random_masks(model_dir, sparsity: float):
+def random_masks(model_dir, out_dir, sparsity: float):
     """Prunes a random [sparsity] of of weights in each matrix of [model_dir].
-    Makes a new checkpoint [model_dir]_random_prune_[sparsity].
+    Makes a new checkpoint [out_dir].
     """
     model_dir = model_dir.rstrip('/')
 
@@ -30,9 +30,8 @@ def random_masks(model_dir, sparsity: float):
         # Save these new variables
         saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
-        output_dir = model_dir + f"_random_prune_{int(sparsity*100)}"
-        os.mkdir(output_dir)
-        saver.save(sess, os.path.join(output_dir, 'random_prune.ckpt'))
+        os.mkdir(out_dir)
+        saver.save(sess, os.path.join(out_dir, 'random_prune.ckpt'))
 
 if __name__ == '__main__':
     fire.Fire(random_masks)

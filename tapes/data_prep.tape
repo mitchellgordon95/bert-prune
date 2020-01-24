@@ -1,41 +1,31 @@
-#! /bin/bash
-#$ -cwd
-#$ -V
-#$ -l num_proc=2,h_rt=10:00:00
-#$ -j y
-#$ -m ase
-#$ -M mitchell.gordon95@gmail.com
-task download_wiki > out {
-  wget https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o enwiki-latest-pages-articles.xml.bz2
-  bunzip2 enwiki-latest-pages-articles.xml.bz2
-  # TODO - this should be a package or something
-  git clone git@github.com:attardi/wikiextractor.git data/wikiextractor
-  python data/wikiextractor/WikiExtractor.py --json -o $out enwiki-latest-pages-articles.xml
+# TODO: move these to main.tconf
+task link_wiki > out {
+     ln -s /exp/mgordon/bert-prune/data/enwiki $out
 }
-
-task download_bookcorpus > out {
-  ## TODO - this should be a package or something
-  git clone git@github.com:soskek/bookcorpus.git bookcorpus
-  pip install -r bookcorpus/requirements.txt
-  python bookcorpus/download_files.py --list url_list.jsonl --out out --trash-bad-count
+task link_bookcorpus > out {
+     ln -s /exp/mgordon/bert-prune/data/bookcorpus/out_txts $out
 }
-
-# TODO: move this branch to main.tconf
 task bert_model > model :: model_loc=(BertSize: base="/exp/mgordon/bert-prune/uncased_L-12_H-768_A-12") {
      ln -s $model_loc $model
 }
 
+task sentencize : scripts 
+    < wiki=$out@link_wiki < books=$out@link_bookcorpus
+    > out
+    :: chunk=(Chunk:0..15) pyenv=@ .submitter=@ .resource_flags=@ .action_flags=@ {
+  python $scripts/preprocess_pretrain_data.py $chunk 16 $wiki $books > $out 
+}
 
-task create_pretrain_data
-    < wiki=$out@download_wiki < books=$out@download_bookcorpus
+task create_pretrain_data : scripts : bert
+    < sentencized=$out@sentencize
     < bert_model=$model@bert_model
     > out_dir
-    :: chunk=(Chunk: 1..8)  {
-  mkdir out_dir
-  python scripts/preprocess_pretrain_data.py $chunk 8 $wiki $books > sentencized
-  python scripts/shuffle_and_split.py sentencized 100
+    :: pyenv=@ .submitter=@ .resource_flags=@ .action_flags=@ {
+  mkdir $out_dir
+  ln $sentencized sentencized
+  python $scripts/shuffle_and_split.py sentencized 50 
   for in_file in sentencized_* ; do
-    python create_pretraining_data.py \
+    python $bert/create_pretraining_data.py \
                 --input_file $in_file \
                 --output_file $out_dir/$(basename $in_file) \
                 --vocab_file $bert_model/vocab.txt \
@@ -44,12 +34,27 @@ task create_pretrain_data
                 --max_predictions_per_seq 20 \
                 --masked_lm_prob 0.15 \
                 --random_seed 12345 \
-                --dupe_factor 5 \
+                --dupe_factor 5
   done
 }
 
-task train_test_split :: data_dirs=$out_dir@create_pretrain_data[Chunk: *] > train > test > dev {
-     for data_dir in $datadirs; do
-         python scripts/train_test_split.py $data_dir $train $test $dev
-     done
+task combine_data
+< data_dirs=$out_dir@create_pretrain_data[Chunk:*]
+> out {
+  mkdir $out
+  cur_fname=1
+  for dir in $data_dirs; do
+    for file in $dir/*; do
+      ln -s $file $out/$cur_fname
+      cur_fname=$(expr $cur_fname + 1)
+    done
+  done
+}
+
+task train_test_split : scripts
+< data=$out@combine_data
+> train
+> test
+> dev :: pyenv=@ {
+  python $scripts/train_test_split.py $data $train $test $dev
 }

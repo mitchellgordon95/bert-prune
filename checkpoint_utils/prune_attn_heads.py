@@ -43,9 +43,9 @@ def prune_single_head(ledger, layer, head):
     FC[SIZE_PER_HEAD*head:SIZE_PER_HEAD*(head+1),:] = 0
 
 
-def prune_attn_heads(model_dir, sparsity: float):
+def prune_attn_heads(model_dir, out_dir, sparsity: float):
     """Prunes [sparsity] of the number of attention heads in [model_dir].
-    Makes a new checkpoint [model_dir]_head_pruned_[sparsity].
+    Makes a new checkpoint [out_dir]
     """
     model_dir = model_dir.rstrip('/')
 
@@ -85,9 +85,8 @@ def prune_attn_heads(model_dir, sparsity: float):
         # Save these new variables
         saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
-        output_dir = model_dir + f"_head_pruned_{int(sparsity*100)}"
-        os.mkdir(output_dir)
-        saver.save(sess, os.path.join(output_dir, 'head_pruned.ckpt'))
+        os.mkdir(out_dir)
+        saver.save(sess, os.path.join(out_dir, 'head_pruned.ckpt'))
 
 if __name__ == '__main__':
     fire.Fire(prune_attn_heads)

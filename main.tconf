@@ -1,0 +1,42 @@
+##################################################################################################
+# Packages used
+##################################################################################################
+package scripts :: .versioner=disk .path="/exp/mgordon/bert-prune/scripts" { }
+package bert :: .versioner=disk .path="/exp/mgordon/bert-prune/bert" { }
+package chkpt_utils :: .versioner=disk .path="/exp/mgordon/bert-prune/checkpoint_utils" { }
+
+global {
+  ##################################################################################################
+  # General options you should set for your environment
+  ##################################################################################################
+
+  # All ducttape files will be written underneath this directory
+  ducttape_output="out"
+
+  ##################################################################################################
+  # Job submission parameters
+  ##################################################################################################
+
+  # SGE: generic job flags
+  resource_flags="-l num_proc=2,h_rt=10:00:00,mem_free=2g"
+
+  # SGE: larger job flags
+  resource_flags_16g="-l mem_free=16g"
+
+  # SGE: flags for training a model
+  resource_flags_titan="-q gpu.q@@titanxp -l gpu=1,mem_free=4g,h_rt=120:00:00"
+
+  # SGE: flags for notifying about job completion (put in your email address!)
+  action_flags="-m ae -M mitchell.gordon95@gmail.com"
+
+  # The default submitter: shell (run locally) or sge (run on a grid)
+  submitter=(TestMode: no="sge" yes="shell")
+
+  use_cpu=(TestMode: no yes)
+
+  # Virtual env location. This should be a file path to the virtual env you want loaded before tasks.
+  # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
+  # where "ENV" is the name of the conda environment that should be loaded. For virtualenv, supply
+  # the path to the script that should be loaded.
+  pyenv="conda:bert-prune"
+}

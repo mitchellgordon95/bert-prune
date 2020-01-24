@@ -1,18 +1,17 @@
 import tensorflow as tf
-import modeling
 import re
 import sys
 import os
 from shutil import copyfile
 
-if len(sys.argv) < 2:
-    print("Usage: make_pretrain_chkpt_prunable.py [pretrain-dir]")
+if len(sys.argv) < 3:
+    print("Usage: make_pretrain_chkpt_prunable.py [pretrain-dir] [output-dir]")
     print("Creates an output directory = [pretrain-dir]_prunable")
     exit()
 else:
     CHECKPOINT_DIR = sys.argv[1].rstrip('/')
     CHECKPOINT_FILE = os.path.join(CHECKPOINT_DIR, 'bert_model.ckpt')
-    OUTPUT_DIR = CHECKPOINT_DIR + "_prunable"
+    OUTPUT_DIR = sys.argv[2].rstrip('/')
     OUTPUT_FILE = os.path.join(OUTPUT_DIR, 'bert_model.ckpt')
 
 os.mkdir(OUTPUT_DIR)

@@ -128,3 +128,4 @@ dmypy.json
 
 models/
 *.png
+out/
