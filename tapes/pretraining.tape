@@ -38,8 +38,8 @@ task prune_pretrain : bert : chkpt_utils
 < train=$train@train_test_split
 < dev=$dev@train_test_split
 > out_model
-:: sparsity=(Sparsity: 10 20 30 40 50 60 70 80 90)
-:: prune_type=(PretrainPrune: none gradual one_shot random head)
+:: sparsity=(Sparsity: 0 10 20 30 40 50 60 70 80 90)
+:: prune_type=(PretrainPrune: one_shot gradual random head)
 :: pyenv=@ .submitter=@ .resource_flags=$resource_flags_titan .action_flags=@ {
 
     # TODO we will eventually have some kind of weight_sparsity_map here
@@ -54,7 +54,7 @@ task prune_pretrain : bert : chkpt_utils
     elif [ $prune_type == random ]; then
       # Random prune with a utility, don't prune with the built-in pruning library
       sparsity_args=""
-      python $chkpt_utils/random_prune.py $in_model random_pruned 0.$sparsity
+      python $chkpt_utils/random_masks.py $in_model random_pruned 0.$sparsity
       # Initialize the pre-training model with the randomly pruned thing instead
       in_model=random_pruned
     elif [ $prune_type ==  head ]; then

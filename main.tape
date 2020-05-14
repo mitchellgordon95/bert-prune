@@ -1,10 +1,19 @@
 import "tapes/submitters.tape"
 import "tapes/versioners.tape"
+import "tapes/link_data.tape"
 import "tapes/data_prep.tape"
+import "tapes/pretraining.tape"
+import "tapes/downstream.tape"
 
 plan data_prep {
   reach train_test_split via (Chunk:*)
 }
+
+plan glue {
+  reach train_glue via (Sparsity: 0 30 60 90) * (PretrainPrune: one_shot) * (GlueTask: *)
+  reach train_glue via (Sparsity: 30 60 90) * (PretrainPrune: random) * (GlueTask: *)
+}
+
 
 global {
   ducttape_experimental_packages=true

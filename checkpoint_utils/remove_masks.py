@@ -5,13 +5,13 @@ import sys
 import os
 from shutil import copyfile
 
-if len(sys.argv) != 2:
-    print("Usage: remove_masks.py [pretrain-dir]")
-    print("Creates an output directory = [pretrain-dir]_no_mask")
+if len(sys.argv) != 3:
+    print("Usage: remove_masks.py [pretrain-dir] [output-dir]")
+    print("Creates a model in [output-dir] with all mask variables set to 1")
     exit()
 else:
     CHECKPOINT_DIR = sys.argv[1].rstrip('/')
-    OUTPUT_DIR = CHECKPOINT_DIR + "_no_mask"
+    OUTPUT_DIR = sys.argv[2].rstrip('/')
 
 os.mkdir(OUTPUT_DIR)
 

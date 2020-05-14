@@ -25,14 +25,13 @@ global {
 
   # SGE: flags for training a model
   resource_flags_titan="-q gpu.q@@titanxp -l gpu=1,mem_free=4g,h_rt=120:00:00"
+  resource_flags_2080="-q gpu.q@@2080 -l gpu=1,mem_free=4g,h_rt=120:00:00"
 
   # SGE: flags for notifying about job completion (put in your email address!)
   action_flags="-m ae -M mitchell.gordon95@gmail.com"
 
   # The default submitter: shell (run locally) or sge (run on a grid)
   submitter=(TestMode: no="sge" yes="shell")
-
-  use_cpu=(TestMode: no yes)
 
   # Virtual env location. This should be a file path to the virtual env you want loaded before tasks.
   # This variable supports both conda and Python's virtualenv. For conda, use "conda:ENV" as the value,
