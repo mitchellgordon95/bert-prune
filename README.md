@@ -13,6 +13,8 @@ If you need *all* the experiments from the paper, check out [this commit](https:
 Configuration
 =============
 
+    pip install -r requirements.txt
+
 To pre-train, you will need a GPU with at least 12 GB of GPU RAM. I've been using Titan RTX's via Univa Grid Engine. If you don't like this setup, you will need to modify tapes/submitters.tape and/or main.tconf.
 
 You'll also need the Wikipedia corpus and BookCorpus, which can be retrieved with scripts/download_wiki.sh or scripts/download_bookcorpus.sh, respectively. GLUE data can be retrieved by running scripts/get_glue.py.
@@ -22,3 +24,7 @@ You will need to update tapes/link_data.tape to point to dataset locations.
 You will also need to update main.tconf to point to the location of your repository on disk (so ducttape knows where to find packages).
 
 AFAIK, no one besides me has used this code. If you have trouble, please open an issue and I'll do what I can to help out.
+
+Most experiments are run using
+
+    ducttape main.tape -C main.tconf -p main
