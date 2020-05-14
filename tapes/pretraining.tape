@@ -89,3 +89,32 @@ task prune_pretrain : bert : chkpt_utils
         python $bert/run_pretraining.py --do_eval=True --max_eval_steps=2000 --input_file=$dev/* $params $sparsity_args
    done
 }
+
+task compare_features : bert : scripts : chkpt_utils
+< in_model=$out_model@prune_pretrain
+< no_prune_model=$out_model@prune_pretrain[Sparsity:0]
+< orig_model=$model@bert_model
+< sentencized=$out@sentencize[Chunk:0]
+> out
+:: pyenv=@ .submitter=@ .resource_flags=$resource_flags_2080 .action_flags=@ {
+
+      # The sentencized chunk is huge, just use ~1.5k random lines
+      ln $sentencized sentencized
+      python $scripts/shuffle_and_split.py sentencized 5000
+      params="--input_file sentencized_0
+      --bert_config_file $orig_model/bert_config.json
+      --layers -1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12
+      --vocab_file $orig_model/vocab.txt
+      --do_lower_case True
+      --max_seq_length 128"
+
+      # Feature files get really big, so we're going to delete this as soon as we're done with it
+      python $bert/extract_features.py --init_checkpoint $in_model --output_file features.json $params
+      python $bert/extract_features.py --init_checkpoint $no_prune_model --output_file no_prune_features.json $params
+
+      python $chkpt_utils/compare_features.py features.json no_prune_features.json > $out
+
+      rm features.json
+      rm no_prune_features.json
+      rm sentencized_*
+}

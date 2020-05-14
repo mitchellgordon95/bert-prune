@@ -1,4 +1,3 @@
-# TODO: move these to main.tconf
 task link_wiki > out {
      ln -s /exp/mgordon/bert-prune/data/enwiki $out
 }
@@ -10,5 +9,4 @@ task bert_model > model :: model_loc=(BertSize: base="/exp/mgordon/bert-prune/un
 }
 task glue_data > data_dir {
      ln -s /exp/mgordon/bert-prune/data/glue_data $data_dir
-
 }

@@ -9,6 +9,10 @@ plan data_prep {
   reach train_test_split via (Chunk:*)
 }
 
+plan compare_features {
+  reach compare_features via (Sparsity: 0 30) * (PretrainPrune: one_shot) 
+}
+
 plan glue {
   reach train_glue via (Sparsity: 0 30 60 90) * (PretrainPrune: one_shot) * (GlueTask: *)
   reach train_glue via (Sparsity: 30 60 90) * (PretrainPrune: random) * (GlueTask: *)
