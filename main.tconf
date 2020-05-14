@@ -24,7 +24,7 @@ global {
   resource_flags_16g="-l mem_free=16g"
 
   # SGE: flags for training a model
-  resource_flags_titan="-q gpu.q@@titanxp -l gpu=1,mem_free=4g,h_rt=120:00:00"
+  resource_flags_titan="-q gpu.q@@titanrtx -l gpu=1,mem_free=4g,h_rt=120:00:00"
   resource_flags_2080="-q gpu.q@@2080 -l gpu=1,mem_free=4g,h_rt=120:00:00"
 
   # SGE: flags for notifying about job completion (put in your email address!)
