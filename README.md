@@ -9,7 +9,7 @@ Things that have not been converted to ducttape:
 - Anything in graphs/
 - Pruning *after* finetuning
 
-If you need *all* the experiments from the paper, check out [this commit](https://github.com/mitchellgordon95/bert-prune/commit/1fd8be2250e427e8338863feb52847c6547cd7ba**. It's very messy, so be prepared to read the code. I will not be releasing a guide to run that code, since it will be made obselete by the ducttape workflow.
+If you need *all* the experiments from the paper, check out [this commit](https://github.com/mitchellgordon95/bert-prune/commit/1fd8be2250e427e8338863feb52847c6547cd7ba). It's very messy, so be prepared to read the code. I will not be releasing a guide to run that code, since it will be made obselete by the ducttape workflow.
 
 Configuration
 =============
